@@ -1,0 +1,68 @@
+material:
+    unique:
+        name: name
+    csv: |
+        "name"
+        "Wood"
+        "Wood + Aluminium"
+
+color:
+    unique:
+        name: Name
+        code: Code
+    group:
+        material: Material
+        name: Name
+    csv: |
+        "Name","Code","Material","Price"
+        "White varnish","W-var","Wood",0
+        "Transparent varnish","T-var","Wood",50
+        "Dark varnish","D-var","Wood",70
+        "White RAL9010","RAL9010","Wood + Aluminium",0
+        "Anthracite Gray RAL7016","RAL7016","Wood + Aluminium",100
+        "Black RAL9005","RAL9005","Wood + Aluminium",150
+
+
+glass:
+    unique:
+        name: Name
+        code: Code
+    csv: |
+        "Name","Code","Price"
+        "Glass 1","GL-1",50
+        "Glass 2","GL-2",20
+        "Glass 3","GL-3",10
+        "Glass 4","GL-4",100
+
+accessories:
+    unique:
+        name: Name
+        code: Code
+    csv: |
+        "Name","Code","Price"
+        "Accessory 1","ACC-1",10
+        "Accessory 2","ACC-2",5
+        "Accessory 3","ACC-3",15
+        "Accessory 4","ACC-4",25
+
+
+multilevel-example:
+    group:
+        continent: continent
+        country: country
+        value: value
+    csv: |
+        continent,country,value
+        Europe,Estonia,Foo
+        Europe,Estonia,Bar
+        Europe,Finland,Bar
+        Europe,Finland,Baz
+        Africa,Ethiopia,Baz
+        Africa,Ethiopia,Quux
+        Africa,Nigeria,Quux
+        Africa,Nigeria,Zuup
+        Africa,Nigeria,Bar
+        Asia,Japan,Bar
+        Asia,Japan,Baz
+        Asia,China,Foo
+        Asia,China,Bar

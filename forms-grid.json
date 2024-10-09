@@ -1,0 +1,244 @@
+{
+    "DataOperationsDemo": {
+        "model": "DataOperationsDemo",
+        "sections": [
+            {
+                "grid": [
+                    {
+                        "field": "continent",
+                        "model": "DataOperationsDemo",
+                        "type": "choice",
+                        "w": 4,
+                        "x": 0,
+                        "y": 0
+                    },
+                    {
+                        "field": "country",
+                        "model": "DataOperationsDemo",
+                        "type": "choice",
+                        "w": 4,
+                        "x": 4,
+                        "y": 0
+                    },
+                    {
+                        "field": "value",
+                        "model": "DataOperationsDemo",
+                        "type": "choice",
+                        "w": 4,
+                        "x": 0,
+                        "y": 1
+                    }
+                ],
+                "initially_open": false,
+                "options": {
+                    "acceptWidgets": true,
+                    "cellHeight": 80,
+                    "children": [],
+                    "float": true,
+                    "margin": 5,
+                    "removable": "#grid-stack-trash"
+                },
+                "title": "Demonstrates drill down"
+            }
+        ]
+    },
+    "ExampleDemo": {
+        "model": "ExampleDemo",
+        "sections": [
+            {
+                "grid": [
+                    {
+                        "field": "width",
+                        "model": "ExampleDemo",
+                        "type": "numeric",
+                        "w": 6,
+                        "x": 0,
+                        "y": 0
+                    },
+                    {
+                        "field": "height",
+                        "model": "ExampleDemo",
+                        "type": "numeric",
+                        "w": 6,
+                        "x": 0,
+                        "y": 1
+                    },
+                    {
+                        "field": "width_first",
+                        "model": "ExampleDemo",
+                        "type": "numeric",
+                        "w": 6,
+                        "x": 0,
+                        "y": 2
+                    },
+                    {
+                        "field": "width_second",
+                        "model": "ExampleDemo",
+                        "type": "compute",
+                        "w": 6,
+                        "x": 0,
+                        "y": 3
+                    }
+                ],
+                "initially_open": true,
+                "options": {
+                    "acceptWidgets": true,
+                    "cellHeight": 80,
+                    "children": [],
+                    "float": true,
+                    "margin": 5,
+                    "removable": "#grid-stack-trash"
+                },
+                "title": "ExampleDemo"
+            },
+            {
+                "grid": [
+                    {
+                        "field": "openable_left",
+                        "model": "ExampleDemo",
+                        "type": "choice",
+                        "w": 6,
+                        "x": 0,
+                        "y": 0
+                    },
+                    {
+                        "field": "openable_right",
+                        "model": "ExampleDemo",
+                        "type": "choice",
+                        "w": 6,
+                        "x": 0,
+                        "y": 1
+                    },
+                    {
+                        "field": "handles",
+                        "model": "ExampleDemo",
+                        "type": "choice",
+                        "w": 6,
+                        "x": 0,
+                        "y": 2
+                    },
+                    {
+                        "field": "hinges",
+                        "model": "ExampleDemo",
+                        "type": "choice",
+                        "w": 6,
+                        "x": 0,
+                        "y": 3
+                    }
+                ],
+                "initially_open": true,
+                "options": {
+                    "acceptWidgets": true,
+                    "cellHeight": 80,
+                    "children": [],
+                    "float": true,
+                    "margin": 5,
+                    "removable": "#grid-stack-trash"
+                },
+                "title": "Features"
+            },
+            {
+                "grid": [
+                    {
+                        "field": "fitting",
+                        "model": "ExampleDemo",
+                        "type": "bool",
+                        "w": 3,
+                        "x": 0,
+                        "y": 0
+                    },
+                    {
+                        "field": "fittings",
+                        "h": 4,
+                        "model": "ExampleDemo",
+                        "type": "list",
+                        "w": 12,
+                        "x": 0,
+                        "y": 1
+                    }
+                ],
+                "initially_open": true,
+                "options": {
+                    "acceptWidgets": true,
+                    "cellHeight": 80,
+                    "children": [],
+                    "float": true,
+                    "margin": 5,
+                    "removable": "#grid-stack-trash"
+                },
+                "title": "Fittings"
+            }
+        ]
+    },
+    "Services": {
+        "model": "Services",
+        "sections": [
+            {
+                "grid": [
+                    {
+                        "field": "service",
+                        "model": "Services",
+                        "type": "choice",
+                        "w": 6,
+                        "x": 0,
+                        "y": 0
+                    },
+                    {
+                        "field": "quantity",
+                        "model": "Services",
+                        "type": "numeric",
+                        "w": 6,
+                        "x": 6,
+                        "y": 0
+                    }
+                ],
+                "initially_open": true,
+                "options": {
+                    "acceptWidgets": true,
+                    "cellHeight": 80,
+                    "children": [],
+                    "float": true,
+                    "margin": 5,
+                    "removable": "#grid-stack-trash"
+                },
+                "title": "Services"
+            }
+        ]
+    },
+    "SummaryDemo": {
+        "model": "SummaryDemo",
+        "sections": [
+            {
+                "grid": [],
+                "initially_open": true,
+                "options": {
+                    "acceptWidgets": true,
+                    "cellHeight": 80,
+                    "children": [],
+                    "float": true,
+                    "margin": 5,
+                    "removable": "#grid-stack-trash"
+                },
+                "title": "SummaryDemo"
+            }
+        ]
+    },
+    "WindowDemo": {
+        "model": "WindowDemo",
+        "sections": [
+            {
+                "grid": [],
+                "initially_open": true,
+                "options": {
+                    "acceptWidgets": true,
+                    "cellHeight": 80,
+                    "children": [],
+                    "float": true,
+                    "margin": 5,
+                    "removable": "#grid-stack-trash"
+                },
+                "title": "WindowDemo"
+            }
+        ]
+    }
+}

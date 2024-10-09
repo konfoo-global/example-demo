@@ -1,0 +1,167 @@
+ExampleDemo:
+    - parallel:
+        - meta:
+            title: Measures
+        - input:
+            field: width
+            title: Width (mm)
+        - input:
+            field: height
+            title: Height (mm)
+        - input:
+            field: width_first
+            title: Width of the left window (mm)
+        - input:
+            field: openable_left
+            title: Openable (left)
+            none: Not openable
+        - input:
+            field: openable_right
+            title: Openable (right)
+            none: Not openable
+
+        # decides if hinges and handles should be visible in the next step
+        - exec:
+            fn: |
+                function(model, ctx, api) {
+                    const root = api.getRef(ctx.root);
+                    if (!root) {
+                        return;
+                    }
+
+                    const features_node = api.getNode().getParent().findNeighbour('ref', 'features-step');
+                    if (!features_node) {
+                        return;
+                    }
+
+                    const has_openable = root.fields.openable_left !== null || root.fields.openable_right !== null;
+
+                    const hinges = features_node.findSubnode('ref', 'hinges');
+                    if (hinges) {
+                        hinges.setEnabled(has_openable);
+                    }
+
+                    const handles = features_node.findSubnode('ref', 'handles');
+                    if (handles) {
+                        handles.setEnabled(has_openable);
+                    }
+                }
+    - parallel:
+        - meta:
+            title: Features
+            ref: features-step
+        - input:
+            field: material
+            title: Material
+        - input:
+            field: is_silent
+            title: Sound proof? (double layer glass, no ventilation gaps)
+        - input:
+            field: in_color
+            title: Internal color
+        - input:
+            field: out_color
+            title: Exeternal color
+        - input:
+            field: hinges
+            title: Hinges
+            meta:
+                enabled: false
+                ref: hinges
+        - input:
+            field: handles
+            title: Handles
+            meta:
+                enabled: false
+                ref: handles
+
+    - parallel:
+        - meta:
+            title: Services
+        - input:
+            field: transport
+            title: Transport
+        - input:
+            field: fitting
+            title: Services
+        # decides if fittings should bevisible in the same step
+            onchange: |
+                function(model, ctx, api) {
+                    const root = api.getRef(ctx.root);
+                    if (!root) {
+                        return;
+                    }
+
+                    const node = api.getNode();
+                    const fittings = node.findNeighbour('ref', 'fittings');
+                    if (fittings) {
+                        fittings.setEnabled(!!root.fields.fitting);
+                    }
+                }
+        - input:
+            field: fittings
+            title: Services
+            width: 100%
+            meta:
+                enabled: false
+                ref: fittings
+
+Services:
+    - meta:
+        ref: fitting
+        title: Add services
+    - input:
+        field: service
+        width: 100%
+        title: Service
+    - input:
+        field: quantity
+        title: Quantity
+    - input:
+        field: unit
+        title: Units
+
+
+DataOperationsDemo:
+    - parallel:
+        - meta:
+            title: Demonstrates related choice logic
+        - input:
+            field: continent
+        - input:
+            field: country
+        - input:
+            field: value
+
+SummaryDemo:
+    - parallel:
+        - meta:
+            title: Demonstrates price summary widget
+        - input:
+            field: glass_type
+            title: Glass Type
+        - input:
+            field: accessory_type
+            title: Accessory Type
+
+WindowDemo:
+    - parallel:
+        - meta:
+            title: Demonstrats an interactive SVG visualization
+        - input:
+            field: width
+            title: Width (mm)
+        - input:
+            field: height
+            title: Height (mm)
+        - input:
+            field: width_first
+            title: Width of the left window (mm)
+        - input:
+            field: openable_left
+            title: Openable (left)
+            none: Not openable
+        - input:
+            field: openable_right
+            title: Openable (right)
+            none: Not openable

@@ -1,0 +1,368 @@
+options:
+    name: Bill of materials
+    path: bom
+
+meta:
+    template_product: KONFOO-TEMPLATE
+    name: (expr) `Window W${to_int(root.fields.width)}xH${to_int(root.fields.height)}`
+
+rules:
+# add materials to BOM
+    - example_demo_frame_horizontal: #Add wood horizontally
+        domain: ExampleDemo
+        require:
+            - self.width
+            - self.material
+        model: mrp.bom.line
+        product_id := product.product.default_code: (expr) if self.width >= 1500 { "wood30" } else { "wood15" }
+        product_uom_id := uom.uom.name: Units
+        product_qty: 2
+
+    - example_demo_frame_vertical: #Add wood vertically
+        domain: ExampleDemo
+        require:
+            - self.height
+            - self.material
+        model: mrp.bom.line
+        product_id := product.product.default_code: (expr) if self.height >= 1500 { "wood30" } else { "wood15" }
+        product_uom_id := uom.uom.name: Units
+        product_qty: 3
+
+    - example_demo_frame_horizontal_alu: #add metal horizontally if needed
+        domain: ExampleDemo
+        require:
+            - self.width
+            - self.material == "Wood + Aluminium"
+        model: mrp.bom.line
+        product_id := product.product.default_code: (expr) if self.width >= 1500 { "alu30" } else { "alu15" }
+        product_uom_id := uom.uom.name: Units
+        product_qty: 2
+
+    - example_demo_frame_vertical_alu: #add metal vertically if needed
+        domain: ExampleDemo
+        require:
+            - self.height
+            - self.material == "Wood + Aluminium"
+        model: mrp.bom.line
+        product_id := product.product.default_code: (expr) if self.height >= 1500 { "alu30" } else { "alu15" }
+        product_uom_id := uom.uom.name: Units
+        product_qty: 3
+
+    - example_demo_left_pane: #create new purchase product for left glass pane
+        domain: ExampleDemo
+        model: product.product
+        require:
+            - self.width_first
+            - self.height
+        template := product.product.default_code: |
+            (expr)
+            let minus = if self.openable_left != () { 40 } else { 20 };
+            if self.is_silent == true { "2glass" } else { "1glass" }
+        name: (expr) `Glass Pane Left W ${self.width_first - minus} xH ${self.height - minus}`
+
+    - example_demo_left_glass_pane: #add previously created product into BOM
+        domain: ExampleDemo
+        require:
+            - self.width
+            - self.height
+        model: mrp.bom.line
+        product_id := id: example_demo_left_pane
+#        product_uom_id := uom.uom.name: m2
+        product_qty:  |
+            (expr)
+            let minus = if self.openable_left != () { 40 } else { 20 };
+            ((self.width_first - minus) * (self.height - minus)) / 1000000;
+
+    - example_demo_right_pane: #create new purchase product for right glass pane
+        domain: ExampleDemo
+        model: product.product
+        require:
+            - self.width_second
+            - self.height
+        template := product.product.default_code: |
+            (expr)
+            let minus = if self.openable_right != () { 40 } else { 20 };
+            if self.is_silent == true { "2glass" } else { "1glass" }
+        name: (expr) `Glass Pane Right W ${self.width_second - minus} xH ${self.height - minus}`
+
+
+    - example_demo_right_glass_pane: #add previously created product into BOM
+        domain: ExampleDemo
+        require:
+            - self.width
+            - self.height
+        model: mrp.bom.line
+        product_id := id: example_demo_right_pane
+#        product_uom_id := uom.uom.name: Units
+        product_qty: |
+            (expr)
+            let minus = if self.openable_right != () { 40 } else { 20 };
+            ((self.width_second - minus) * (self.height - minus)) / 1000000;
+
+    - example_demo_internal_color: #add internal color into BOM
+        domain: ExampleDemo
+        require:
+            - self.in_color
+            - self.width
+            - self.height
+        model: mrp.bom.line
+        product_id := product.product.default_code: (expr) unique("color", "name", self.in_color).Code
+        product_uom_id := uom.uom.name: kg
+        product_qty: (expr) (((3 * (self.height * 78)) + (2 * (self.width * 78)) * 2) / 1000000)
+
+    - example_demo_external_color: #add external color into BOM
+        domain: ExampleDemo
+        require:
+            - self.out_color
+            - self.width
+            - self.height
+        model: mrp.bom.line
+        product_id := product.product.default_code: (expr) unique("color", "name", self.out_color).Code
+        product_uom_id := uom.uom.name: kg
+        product_qty: (expr) (((3 * (self.height * 78)) + (2 * (self.width * 78)) * 3) / 1000000)
+
+    - example_demo_hinges: #add hinges into BOM
+        domain: ExampleDemo
+        require:
+            - self.hinges
+        model: mrp.bom.line
+        product_id := product.product.default_code: (expr) unique("hinges", "name", self.hinges).default_code
+        product_uom_id := uom.uom.name: Units
+        product_qty: |
+            (expr)
+            let left = if self.openable_left != () { 1 } else { 0 };
+            let right = if self.openable_right != () { 1 } else { 0 };
+            return left + right;
+
+    - example_demo_handles: #add handels into BOM
+        domain: ExampleDemo
+        require:
+            - self.handles
+        model: mrp.bom.line
+        product_id := product.product.default_code: (expr) unique("handles", "name", self.handles).default_code
+        product_uom_id := uom.uom.name: Units
+        product_qty: |
+            (expr)
+            let left = if self.openable_left != () { 1 } else { 0 };
+            let right = if self.openable_right != () { 1 } else { 0 };
+            return left + right;
+
+#add sale order lines outside of BOM
+
+    - example_demo_add_delivery:
+        domain: ExampleDemo
+        model: sale.order.line
+        require:
+            - self.transport == "Transport"
+        order_id := parent: id
+        product_id := product.product.default_code: (expr) unique("transport", "name", self.transport).default_code
+        product_uom_qty: 1
+
+    - example_demo_add_service:
+        domain: Services
+        model: sale.order.line
+        require:
+            - self.service
+            - self.quantity
+        order_id := parent: id
+        product_id := product.product.default_code: (expr) unique("services", "name", self.service).default_code
+        product_uom_qty: (expr) self.quantity
+
+# Add operations
+
+    - op_cutting_wood:
+        domain: ExampleDemo
+        require:
+            - self.width
+            - self.height
+            - self.width_second
+            - self.width_first
+            - self.material
+        model: mrp.routing.workcenter
+        workcenter_id := mrp.workcenter.code: CUT
+        name: Wood profile cutting
+        time_cycle_manual: |
+            (expr)
+            let left = if self.openable_left != () && self.hinges == "Hidden hinges" { 12 } else if self.openable_left != () { 4 } else { 0 };
+            let right = if self.openable_right != () && self.hinges == "Hidden hinges" { 12 } else if self.openable_left != () { 4 } else { 0 };
+            return (10 + left + right) * 2;
+        note: |
+            (expr)
+            let result = `2x ${self.width} mm<br />
+                3x ${self.height} mm<br />`;
+
+            if self.openable_right != () {
+                result += `2x ${self.width_second - 50} mm<br />
+                2x ${self.height - 40} mm<br />`;
+            }
+            if self.openable_left != () {
+                result += `2x ${self.width_first - 40} mm<br />
+                    2x ${self.height - 40} mm<br />`;
+            }
+            return result;
+
+    - op_cutting_alu:
+        domain: ExampleDemo
+        require:
+            - self.width
+            - self.height
+            - self.width_second
+            - self.width_first
+            - self.material
+        model: mrp.routing.workcenter
+        workcenter_id := mrp.workcenter.code: CUTALU
+        name: Alu profile cutting
+        time_cycle_manual: |
+            (expr)
+            let left = if self.openable_left != () { 4 } else { 0 };
+            let right = if self.openable_right != () { 4 } else { 0 };
+            return (10 + left + right) * 2;
+        note: |
+            (expr)
+            let result = `2x ${self.width} mm<br />
+                3x ${self.height} mm<br />`;
+
+            if self.openable_right != () {
+                result += `2x ${self.width_second - 50} mm<br />
+                2x ${self.height - 40} mm<br />`;
+            }
+            if self.openable_left != () {
+                result += `2x ${self.width_first - 40} mm<br />
+                    2x ${self.height - 40} mm<br />`;
+            }
+            return result;
+
+    - op_interior_painting_1:
+        domain: ExampleDemo
+        require:
+            - self.in_color
+        model: mrp.routing.workcenter
+        workcenter_id := mrp.workcenter.code: PAINT
+        name: Internal painting 1
+        time_cycle_manual: |
+            (expr)
+            let left = if self.openable_left != () { 2 } else { 0 };
+            let right = if self.openable_right != () { 2 } else { 0 };
+            return (6 + left + right);
+
+    - op_interior_drying_1:
+        domain: ExampleDemo
+        require:
+            - self.in_color
+        model: mrp.routing.workcenter
+        workcenter_id := mrp.workcenter.code: DRY
+        name: Internal paint drying 1
+        time_cycle_manual: 60
+
+
+    - op_interior_painting_2:
+        domain: ExampleDemo
+        require:
+            - self.in_color
+        model: mrp.routing.workcenter
+        workcenter_id := mrp.workcenter.code: PAINT
+        name: Internal painting 2
+        time_cycle_manual: |
+            (expr)
+            let left = if self.openable_left != () { 2 } else { 0 };
+            let right = if self.openable_right != () { 2 } else { 0 };
+            return (6 + left + right);
+
+    - op_interior_drying_2:
+        domain: ExampleDemo
+        require:
+            - self.in_color
+        model: mrp.routing.workcenter
+        workcenter_id := mrp.workcenter.code: DRY
+        name: Internal paint drying 2
+        time_cycle_manual: 60
+
+#exterior painting
+
+    - op_exterior_painting_1:
+        domain: ExampleDemo
+        require:
+            - self.in_color
+        model: mrp.routing.workcenter
+        workcenter_id := mrp.workcenter.code: PAINT
+        name: External painting 1
+        time_cycle_manual: |
+            (expr)
+            let left = if self.openable_left != () { 2 } else { 0 };
+            let right = if self.openable_right != () { 2 } else { 0 };
+            return (6 + left + right);
+
+    - op_exterior_drying_1:
+        domain: ExampleDemo
+        require:
+            - self.in_color
+        model: mrp.routing.workcenter
+        workcenter_id := mrp.workcenter.code: DRY
+        name: External paint drying 1
+        time_cycle_manual: 60
+
+    - op_exterior_painting_2:
+        domain: ExampleDemo
+        require:
+            - self.in_color
+        model: mrp.routing.workcenter
+        workcenter_id := mrp.workcenter.code: PAINT
+        name: External painting 2
+        time_cycle_manual: |
+            (expr)
+            let left = if self.openable_left != () { 2 } else { 0 };
+            let right = if self.openable_right != () { 2 } else { 0 };
+            return (6 + left + right);
+
+    - op_exterior_drying_2:
+        domain: ExampleDemo
+        require:
+            - self.in_color
+        model: mrp.routing.workcenter
+        workcenter_id := mrp.workcenter.code: DRY
+        name: External paint drying 2
+        time_cycle_manual: 60
+
+    - op_assembly:
+        domain: ExampleDemo
+        model: mrp.routing.workcenter
+        workcenter_id := mrp.workcenter.code: ASSEM
+        name: Assembly
+        time_cycle_manual: |
+            (expr)
+            let left = if self.openable_left != () { 25 } else { 0 };
+            let right = if self.openable_right != () { 25 } else { 0 };
+            return (30 + left + right);
+
+    - op_assembly:
+        domain: ExampleDemo
+        model: mrp.routing.workcenter
+        workcenter_id := mrp.workcenter.code: ASSEM
+        name: Packing
+        time_cycle_manual: 12
+
+# summary of glass demo
+
+    - summary_demo_glass:
+        domain: SummaryDemo
+        require:
+            - self.glass_type
+        price: |
+            (expr)
+            let result = unique("glass", "name", self.glass_type);
+            if result != () {
+                return result.Price;
+            }
+            return 0;
+
+    - summary_demo_accessory:
+        domain: SummaryDemo
+        require:
+            - self.accessory_type
+        price: |
+            (expr)
+            let result = unique("accessories", "name", self.accessory_type);
+            if result != () {
+                return result.Price;
+            }
+            return 0;

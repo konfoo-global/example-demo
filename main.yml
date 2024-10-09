@@ -1,0 +1,310 @@
+root:
+    - DataOperationsDemo
+    - SummaryDemo
+    - WindowDemo
+    - ExampleDemo
+
+options:
+    form: form.yml
+    aggregators:
+        - aggregator.yml
+    scripts:
+        util: util.rhai
+    data:
+        - data.yml
+
+ExampleDemo:
+    meta:
+        title: Example Window Configurator
+        visualizerPosition: side
+        visualizers:
+            knf-window:
+                url: https://components.konfoo.com/knf-window.js
+                svg_width: 100%
+                svg_height: 300
+
+
+    openable_left: PaneOpenable
+    openable_right: PaneOpenable
+
+    width: OpeningSizeWidth
+    height: OpeningSizeHeight
+    width_first: PaneSize
+    width_second:
+        type: compute
+        onchange:
+            - width
+            - width_first
+        code: |
+            fn compute_second() {
+                let margin = 10; // some margin between windows
+                return self.width - self.width_first - margin;
+            }
+    material:
+        type: choice
+        options: derive.material.unique.name
+
+    is_silent:
+        type: bool
+
+    in_color:
+        type: choice
+        depends:
+            - material
+        options: derive.color.group.name
+        widget: search
+        validate: |
+            let groups = [];
+            let values = [];
+
+            if self.material != () {
+                groups.push("material");
+                values.push("Wood");
+            }
+
+            print(`groups = ${groups}`);
+            print(`values = ${values}`);
+
+            let filtered = values(
+                group_filter("color", groups, values),
+                "Name"
+            );
+            Validity.enable_option(|x| {
+                if filtered.len() == 0 {
+                    return false;
+                }
+                return filtered.contains(x);
+            });
+            return true;
+
+    out_color:
+        type: choice
+        options: derive.color.unique.name
+        depends:
+            - material
+        validate: |
+            let groups = [];
+            let values = [];
+
+            if self.material != () {
+                groups.push("material");
+                values.push("Wood + Aluminium");
+            }
+
+            print(`groups = ${groups}`);
+            print(`values = ${values}`);
+
+            let filtered = values(
+                group_filter("color", groups, values),
+                "Name"
+            );
+            Validity.enable_option(|x| {
+                if filtered.len() == 0 {
+                    return false;
+                }
+                return filtered.contains(x);
+            });
+            return true;
+
+    handles:
+        type: choice
+        constraint: optional
+        options: derive.handles.unique.name
+
+    hinges:
+        type: choice
+        constraint: optional
+        options: derive.hinges.unique.name
+
+    transport:
+        type: choice
+        widget: radio
+        options: derive.transport.unique.name
+
+    fitting:
+        type: bool
+
+    fittings:
+        type: list
+        model: Services
+
+DataOperationsDemo:
+    meta:
+        title: Data operations
+
+    continent:
+        type: choice
+        constraint: optional
+        widget: search
+        options: derive.multilevel-example.group.continent
+        # options: derive_group("multilevel-example", "continent") + derive_group("multilevel", "country")
+
+    country:
+        type: choice
+        constraint: optional
+        widget: search
+        options: derive.multilevel-example.group.country
+        depends:
+            - continent
+        validate: |
+            let groups = [];
+            let values = [];
+
+            if self.continent != () {
+                groups.push("continent");
+                values.push(self.continent);
+            }
+
+            print(`groups = ${groups}`);
+            print(`values = ${values}`);
+
+            let filtered = values(
+                group_filter("multilevel-example", groups, values),
+                "country"
+            );
+            Validity.enable_option(|x| {
+                if filtered.len() == 0 {
+                    return true;
+                }
+                return filtered.contains(x);
+            });
+            return true;
+
+    value:
+        type: choice
+        constraint: optional
+        options: derive.multilevel-example.group.value
+        depends:
+            - continent
+            - country
+        validate: |
+            let groups = [];
+            let values = [];
+            if self.continent != () {
+                groups.push("continent");
+                values.push(self.continent);
+            }
+
+            if self.country != () {
+                groups.push("country");
+                values.push(self.country);
+            }
+
+            print(`groups = ${groups}`);
+            print(`values = ${values}`);
+
+            let filtered = values(
+                group_filter("multilevel-example", groups, values),
+                "value"
+            );
+            Validity.enable_option(|x| {
+                if filtered.len() == 0 {
+                    return true;
+                }
+                return filtered.contains(x);
+            });
+            return true;
+
+Services:
+    service:
+        type: choice
+        options: derive.services.unique.name
+    quantity:
+        type: numeric
+    unit:
+        type: compute
+        onchange:
+            - service
+        code: |
+            fn main() {
+                return unique("services", "name", self.service)["unit"];
+            }
+
+SummaryDemo:
+    meta:
+        title: Summary component demo
+        visualizerPosition: side
+        visualizers:
+            knf-summary:
+                url: https://components.konfoo.com/knf-summary.js
+                aggregator: bom
+                field: price
+                currency: €
+                header: Total value
+
+    glass_type:
+        type: choice
+        options: derive.glass.unique.name
+
+    accessory_type:
+        type: choice
+        options: derive.accessories.unique.name
+
+
+WindowDemo:
+    meta:
+        title: Visual component demo
+        visualizerPosition: side
+        visualizers:
+            knf-window:
+                url: https://components.konfoo.com/knf-window.js
+                svg_width: 100%
+                svg_height: 300
+
+    openable_left: PaneOpenable
+    openable_right: PaneOpenable
+
+    width: OpeningSize
+    height: OpeningSize
+    width_first: PaneSize
+    width_second:
+        type: compute
+        onchange:
+            - width
+            - width_first
+        code: |
+            fn compute_second() {
+                let margin = 10; // some margin between windows
+                return self.width - self.width_first - margin;
+            }
+
+
+# Custom types can be defined for convenient reuse.
+
+types:
+    PaneOpenable:
+        type: choice
+        constraint: optional
+        options:
+            - Left
+            - Right
+            - Top
+
+    OpeningSize:
+        type: numeric
+        min: 1520
+        max: 10000
+        step: 10
+
+    PaneSize:
+        type: numeric
+        min: 500
+        max: 5000
+        step: 10
+
+    OpeningSizeWidth:
+        type: numeric
+        min: 1520
+        max: 10000
+        step: 10
+    OpeningSizeHeight:
+        type: numeric
+        min: 1320
+        max: 10000
+        step: 10
+
+    PaneSize:
+        type: numeric
+        min: 300
+        max: 5000
+        step: 10
